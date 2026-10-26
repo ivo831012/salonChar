@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Салон Чар</title>
+<title>Графикът на салона</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Салон">
@@ -166,6 +166,17 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
 .crow .meta{font-size:12px;color:var(--muted);text-align:right;line-height:1.3}
 .crow .meta b{display:block;color:var(--ink);font-size:13px}
 .clist .none{padding:14px;color:var(--muted);font-size:14px}
+.v-head{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.v-when{font-size:13px;font-weight:800;color:var(--sc,var(--accent));font-variant-numeric:tabular-nums}
+.v-title{font-family:var(--display);font-weight:400;font-size:25px;line-height:1.15;margin:2px 0 0;overflow-wrap:anywhere}
+.pen{flex:none;width:48px;height:48px;border-radius:14px;border:0;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.pen svg{width:22px;height:22px}
+.v-rows{display:grid;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.v-row{display:grid;grid-template-columns:92px 1fr;gap:10px;align-items:baseline;padding:10px 12px;border-top:1px solid var(--line)}
+.v-row:first-child{border-top:0}
+.v-row .k{font-size:12px;font-weight:700;color:var(--muted)}
+.v-row .v{font-weight:600;overflow-wrap:anywhere;min-width:0}
+.v-row .v i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:6px}
 .cd-name{font-family:var(--display);font-weight:400;font-size:26px;margin:0;overflow-wrap:anywhere}
 @media (prefers-reduced-motion:no-preference){.sheet{animation:up .2s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
 
@@ -325,6 +336,25 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
     <button type="button" class="secondary" id="saveMoreBtn">Запиши + още процедура за клиента</button>
   </form>
 </div>
+<div id="viewBg" class="sheet-bg" hidden></div>
+<div id="viewSheet" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="vTitle">
+  <div class="sheet-inner">
+    <div class="v-head">
+      <div style="min-width:0"><div class="v-when" id="vWhen"></div><h2 class="v-title" id="vTitle"></h2></div>
+      <button class="pen" id="vEdit" type="button" aria-label="Редактирай часа">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </button>
+    </div>
+    <div class="v-rows" id="vRows"></div>
+    <div class="tools" id="vTools"></div>
+    <div class="hist" id="vHist" hidden></div>
+    <div class="actions">
+      <button class="secondary" id="vMore" type="button">+ Още процедура за клиента</button>
+      <span class="grow"></span>
+      <button class="primary" id="vClose" type="button">Затвори</button>
+    </div>
+  </div>
+</div>
 <div id="toast" class="toast" hidden></div>
 
 <script>
@@ -474,7 +504,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
           b.style.top=(4+a._lane*(barH+3))+"px";b.style.height=barH+"px";
           b.textContent=a.start+" "+(a.client||"")+(a.service?" · "+a.service:"");
           b.title=a.start+"–"+a.end+" "+(a.client||"")+" · "+(a.service||"");
-          b.onclick=e=>{e.stopPropagation();openSheet(orig)};
+          b.onclick=e=>{e.stopPropagation();openView(orig)};
           tr.append(b);
         });
         if(k===todayKey&&nowMin>=h0*60&&nowMin<=h1*60){const n=el("div","wk-now");n.style.left=xOf(nowMin)+"px";tr.append(n)}
@@ -537,7 +567,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
         c.append(el("span","who",(a.client||"")+(a.phone?" · "+a.phone:"")));
         if(a.note)c.append(el("span","who",a.note));
         if(mine.some(o=>overlaps(o,a)))c.append(el("span","par","паралелно"));
-        b.append(t,c);b.onclick=()=>openSheet(a);list.append(b);
+        b.append(t,c);b.onclick=()=>openView(a);list.append(b);
       });
       col.append(list);box.append(col);
     });
@@ -798,8 +828,65 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
     $("sheet").hidden=false;$("sheetBg").hidden=false;$("sheet").scrollTop=0;
   }
   function closeSheet(){$("sheet").hidden=true;$("sheetBg").hidden=true;editing=null}
+
+  /* ---------- карта за преглед на записан час ---------- */
+  let viewing=null;
+  function openView(a){
+    viewing=a;
+    const st=staffById(a.staffId),d=parse(a.date);
+    const dur=toMin(a.end)-toMin(a.start);
+    $("viewSheet").style.setProperty("--sc",st?colorOf(st):"var(--accent)");
+    $("vWhen").textContent=DAYS[(d.getDay()+6)%7]+", "+d.getDate()+" "+MONTHS[d.getMonth()]+" · "+a.start+"–"+a.end+" ("+durLabel(dur)+")";
+    $("vTitle").textContent=a.service||"—";
+    const rows=$("vRows");rows.textContent="";
+    const row=(k,v)=>{const r=el("div","v-row");r.append(el("span","k",k));const val=el("span","v");if(typeof v==="string")val.textContent=v;else val.append(v);r.append(val);rows.append(r)};
+    row("Клиент",a.client||"—");
+    row("Телефон",a.phone||"няма");
+    const who=el("span");if(st){who.style.setProperty("--c",colorOf(st));who.append(el("i"))}who.append(document.createTextNode(st?st.name:(a.staffName||"—")));
+    row("При",who);
+    if(a.note)row("Бележка",a.note);
+    const par=appts.filter(o=>overlaps(o,a));
+    if(par.length)row("Паралелно с",par.map(o=>o.start+"–"+o.end+" "+(o.client||"")+(o.service?" ("+o.service+")":"")).join("; "));
+    const tools=$("vTools");tools.textContent="";$("vHist").hidden=true;
+    if(a.phone){
+      const call=el("a",null,"Обади се");call.href="tel:"+a.phone.replace(/[^\d+]/g,"");
+      const cp=el("button","mini","Копирай номера");cp.type="button";
+      cp.onclick=async()=>{try{await navigator.clipboard.writeText(a.phone);toast("Копирано")}catch(e){}};
+      tools.append(call,cp);
+    }
+    const ph=normPhone(a.phone);
+    const c=(ph.length>=6&&clients.find(x=>normPhone(x.phone)===ph))||(!ph&&clients.find(x=>x.name.trim().toLowerCase()===(a.client||"").trim().toLowerCase()));
+    if(c){const h=el("button","mini strong","История · "+c.count+(c.count===1?" посещение":" посещения"));h.type="button";h.onclick=()=>viewHistory(c);tools.append(h)}
+    tools.hidden=!tools.children.length;
+    $("viewSheet").hidden=false;$("viewBg").hidden=false;$("viewSheet").scrollTop=0;
+  }
+  function closeView(){$("viewSheet").hidden=true;$("viewBg").hidden=true;viewing=null}
+  async function viewHistory(c){
+    const box=$("vHist");
+    if(!box.hidden){box.hidden=true;return}
+    box.textContent="";box.append(el("div","none","Зареждане…"));box.hidden=false;
+    try{
+      const list=await api("getHistory",c.phone||"",c.phone?"":c.name);
+      box.textContent="";
+      if(!list.length){box.append(el("div","none","Няма предишни посещения."));return}
+      list.forEach(x=>{
+        const r=el("div","h");
+        const d=el("span","d",shortDate(x.date));d.append(el("span","w",x.start));
+        const w=el("span");w.append(el("b",null,x.service||"—"));
+        w.append(el("span","w",(staffById(x.staffId)?staffById(x.staffId).name:x.staffName||"")+(x.note?" · "+x.note:"")));
+        r.append(d,w);box.append(r);
+      });
+    }catch(e){box.textContent="";box.append(el("div","none","Историята не се зареди. Проверете интернета."))}
+  }
+  $("vEdit").onclick=()=>{const a=viewing;closeView();if(a)openSheet(a)};
+  $("vClose").onclick=closeView;$("viewBg").onclick=closeView;
+  $("vMore").onclick=()=>{
+    const a=viewing;if(!a)return;closeView();
+    const other=staff.find(s=>s.id!==a.staffId);
+    openSheet(null,other?other.id:a.staffId,a.date,a.end,{client:a.client,phone:a.phone});
+  };
   $("cancelBtn").onclick=closeSheet;$("sheetBg").onclick=closeSheet;
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("sheet").hidden)closeSheet()});
+  document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;if(!$("sheet").hidden)closeSheet();else if(!$("viewSheet").hidden)closeView()});
   $("fStaff").addEventListener("change",tintSheet);
 
   $("form").addEventListener("submit",e=>{e.preventDefault();save(false)});
@@ -856,7 +943,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
   };
 
   // опресняване на всеки 20 секунди, за да се виждат часовете, записани от колегите
-  setInterval(()=>{if(document.visibilityState==="visible"&&$("sheet").hidden&&!inSettings&&!inClients&&pin)load(true)},20000);
+  setInterval(()=>{if(document.visibilityState==="visible"&&$("sheet").hidden&&$("viewSheet").hidden&&!inSettings&&!inClients&&pin)load(true)},20000);
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&pin&&!inSettings&&!inClients)load(true)});
 
   if(API_URL.indexOf("/exec")<0){$("status").textContent="Липсва линкът към Apps Script. Попълнете API_URL в началото на index.html.";return}
