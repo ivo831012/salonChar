@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Графикът на салона</title>
+<title>Салон „Чар“</title>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Салон">
+<meta name="apple-mobile-web-app-title" content="Салон Чар">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%27%23D81B7A%27/%3E%3Ctext x=%2732%27 y=%2744%27 font-size=%2734%27 text-anchor=%27middle%27 fill=%27white%27 font-family=%27Georgia%27%3EС%3C/text%3E%3C/svg%3E">
 <script>
-  /* ===== НАСТРОЙКИ — попълнете ===== */
-  // Линкът на уеб приложението от Apps Script (завършва на /exec):
+  /* ===== НАСТРОЙКИ ===== */
+  // Връзката към Google таблицата (уеб приложението в Apps Script):
   const API_URL = "https://script.google.com/macros/s/AKfycbydYJjpmKd2dNf424aG5CPGtWoq7ZGhP-vLzwHiPXayFPrpR7IomdtBkFOc_vpfKccs/exec";
   // Името, което се показва горе:
-  const SALON_NAME = "Графикът на салона";
+  const SALON_NAME = "Салон „Чар“";
 </script>
 <meta name="theme-color" content="#D81B7A">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Manrope:wght@400;500;600;700;800&display=swap">
@@ -177,6 +177,33 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
 .v-row .k{font-size:12px;font-weight:700;color:var(--muted)}
 .v-row .v{font-weight:600;overflow-wrap:anywhere;min-width:0}
 .v-row .v i{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:6px}
+.viewseg.three{grid-template-columns:1fr 1fr 1fr}
+/* месечен календар */
+.mnav{display:flex;align-items:center;gap:8px}
+.mnav .mtitle{flex:1;min-width:0;font-family:var(--display);font-size:24px;text-transform:capitalize}
+.mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.mgrid .wd{font-size:11px;font-weight:800;color:var(--muted);text-align:center;letter-spacing:.04em;text-transform:uppercase;padding-bottom:2px}
+.mcell{min-height:62px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:5px 4px;display:grid;align-content:start;justify-items:center;gap:4px;min-width:0}
+.mcell .n{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.mcell .md{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;max-width:100%}
+.mcell .md i{width:7px;height:7px;border-radius:50%;background:var(--c)}
+.mcell .more{font-size:10px;font-weight:800;color:var(--muted);line-height:1}
+.mcell.out{opacity:.4}
+.mcell.today .n{color:var(--accent)}
+.mcell.today{border-color:var(--accent)}
+.mcell[aria-pressed="true"]{background:linear-gradient(160deg,var(--accent),var(--accent2));border-color:transparent;color:#fff}
+.mcell[aria-pressed="true"] .n,.mcell[aria-pressed="true"] .more{color:#fff}
+.mcell[aria-pressed="true"] .md i{box-shadow:0 0 0 1.5px #fff}
+.agenda{display:grid;gap:8px}
+.agenda .ah{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.agenda .ah h3{font-family:var(--display);font-weight:400;font-size:21px;margin:0}
+.ag-item{display:grid;grid-template-columns:56px 1fr;gap:10px;text-align:left;width:100%;background:var(--surface);border:0;border-left:5px solid var(--c);border-radius:12px;padding:9px 12px;box-shadow:0 1px 2px rgb(0 0 0 / .06)}
+.ag-item .t{font-weight:800;color:var(--c);font-variant-numeric:tabular-nums}
+.ag-item .t small{display:block;font-weight:600;color:var(--muted);font-size:12px}
+.ag-item .s{font-weight:700;display:block;overflow-wrap:anywhere}
+.ag-item .w{font-size:13px;color:var(--muted);display:block;overflow-wrap:anywhere}
+.cedit{display:grid;gap:10px;border:1.5px solid var(--line);border-radius:12px;padding:12px}
+.cd-note{font-size:14px;background:var(--info-bg);color:var(--info);border-radius:10px;padding:8px 12px;overflow-wrap:anywhere}
 .cd-name{font-family:var(--display);font-weight:400;font-size:26px;margin:0;overflow-wrap:anywhere}
 @media (prefers-reduced-motion:no-preference){.sheet{animation:up .2s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
 
@@ -215,8 +242,11 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
 <body>
 <header class="hero"><div class="hero-in">
   <div class="hero-top">
-    <h1 id="salonName">Графикът на салона</h1>
+    <h1 id="salonName">Салон „Чар“</h1>
     <div class="hbtns">
+    <button class="gear" id="monthBtn" aria-label="Месечен календар" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16.5" rx="2.5"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4"/><path d="M7.5 13.5h.01M12 13.5h.01M16.5 13.5h.01M7.5 17h.01M12 17h.01"/></svg>
+    </button>
     <button class="gear" id="clientsBtn" aria-label="Клиенти" hidden>
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
     </button>
@@ -248,15 +278,16 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
   </section>
 
   <div id="main" style="display:grid;gap:16px" hidden>
-    <div class="weeknav">
+    <div class="weeknav" id="weekNav">
       <button class="iconbtn" id="prev" aria-label="Предишна седмица">‹</button>
       <div class="range" id="range"></div>
       <button class="iconbtn" id="next" aria-label="Следваща седмица">›</button>
       <button class="textbtn" id="todayBtn">Днес</button>
     </div>
-    <div class="viewseg" id="viewSeg">
+    <div class="viewseg three" id="viewSeg">
       <button type="button" data-v="day" aria-pressed="true">Ден</button>
       <button type="button" data-v="week" aria-pressed="false">Седмица</button>
+      <button type="button" data-v="month" aria-pressed="false">Месец</button>
     </div>
     <div class="strip" id="strip"></div>
     <div class="chips" id="filterChips"></div>
@@ -265,6 +296,16 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
       <section class="cols" id="cols"></section>
     </div>
     <div id="weekView" style="display:grid;gap:8px" hidden></div>
+    <div id="monthView" style="display:grid;gap:14px" hidden>
+      <div class="mnav">
+        <button class="iconbtn" id="mPrev" aria-label="Предишен месец">‹</button>
+        <div class="mtitle" id="mTitle"></div>
+        <button class="iconbtn" id="mNext" aria-label="Следващ месец">›</button>
+        <button class="textbtn" id="mToday">Днес</button>
+      </div>
+      <div class="mgrid" id="mGrid"></div>
+      <section class="agenda" id="agenda"></section>
+    </div>
   </div>
 
   <div id="settingsView" style="display:grid;gap:16px" hidden>
@@ -275,6 +316,15 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
       <div id="svcEdit" style="display:grid;gap:8px"></div>
       <div class="actions"><button class="secondary" id="svcAdd">+ Добави услуга</button><span class="grow"></span><button class="primary" id="svcSave">Запази услугите</button></div>
       <div class="msg" id="svcMsg"></div>
+    </section>
+    <section class="card">
+      <h2>Клиенти</h2>
+      <p class="hint">Добавете клиент, без да му записвате час. Ще се появява в подсказките и в 🔍 търсенето.</p>
+      <div class="field"><label for="ncName">Име</label><input id="ncName" maxlength="80" placeholder="Име и фамилия"></div>
+      <div class="field"><label for="ncPhone">Телефон</label><input id="ncPhone" type="tel" inputmode="tel" maxlength="30" placeholder="08…"></div>
+      <div class="field"><label for="ncNote">Бележка (по желание)</label><input id="ncNote" maxlength="300" placeholder="напр. алергия, номер на боя, предпочитания"></div>
+      <div class="actions"><span class="grow"></span><button class="primary" id="ncSave">Добави клиент</button></div>
+      <div class="msg" id="ncMsg"></div>
     </section>
     <section class="card">
       <h2>Служители</h2>
@@ -296,7 +346,16 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
     <section class="card" id="cDetail" hidden>
       <button class="linkish" id="cBack" type="button">← Всички клиенти</button>
       <div><h2 class="cd-name" id="cdName"></h2><div class="hint" id="cdPhone"></div></div>
+      <div class="cd-note" id="cdNote" hidden></div>
       <div class="tools" id="cdTools"></div>
+      <div class="cedit" id="cdEdit" hidden>
+        <div class="field"><label for="ceName">Име</label><input id="ceName" maxlength="80"></div>
+        <div class="field"><label for="cePhone">Телефон</label><input id="cePhone" type="tel" inputmode="tel" maxlength="30"></div>
+        <div class="field"><label for="ceNote">Бележка</label><input id="ceNote" maxlength="300" placeholder="напр. алергия, номер на боя"></div>
+        <p class="hint">Промяната важи за подсказките и търсенето. Старите записани часове пазят името, с което са записани.</p>
+        <div class="actions"><span class="grow"></span><button class="secondary" id="ceCancel" type="button">Отказ</button><button class="primary" id="ceSave" type="button">Запази</button></div>
+        <div class="msg" id="ceMsg"></div>
+      </div>
       <div class="label-h hint" id="cdSummary"></div>
       <div class="hist" id="cdHist"></div>
     </section>
@@ -373,6 +432,8 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
   let filter=store.get("salon.filter")||"all";
   let view=store.get("salon.view")==="week"?"week":"day";
   let weekStart=mondayOf(new Date()),day=iso(new Date()),editing=null,delArmed=false,svcDraft=null;
+  let monthStart=new Date(new Date().getFullYear(),new Date().getMonth(),1),monthAppts=[],mSel=iso(new Date());
+  if(store.get("salon.view")==="month")view="month";
 
   // Връзка с Google таблицата през Apps Script
   async function api(fn){
@@ -394,7 +455,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
   function toMin(t){const p=t.split(":").map(Number);return p[0]*60+p[1]}
   function fromMin(m){m=Math.min(m,24*60-1);return pad(Math.floor(m/60))+":"+pad(m%60)}
   function durLabel(m){const h=Math.floor(m/60),r=m%60;return h?(h+" ч"+(r?" "+r+" мин":"")):(r+" мин")}
-  function shortDate(s){const d=parse(s);return d.getDate()+" "+MSHORT[d.getMonth()]+(d.getFullYear()!==new Date().getFullYear()?" "+d.getFullYear():"")}
+  function shortDate(s){if(!s)return "—";const d=parse(s);return d.getDate()+" "+MSHORT[d.getMonth()]+(d.getFullYear()!==new Date().getFullYear()?" "+d.getFullYear():"")}
   function colorOf(s){return "var(--c"+(((s&&s.color)||0)%8)+")"}
   function staffById(id){return staff.find(s=>s.id===id)}
   function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
@@ -415,7 +476,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
       const first=!loaded;loaded=true;
       $("status").textContent="Изберете ден и натиснете „+ Час“ при служителя.";
       renderAll();
-      if(first)loadClients();
+      if(first){loadClients();if(view==="month")loadMonth()}
     }catch(e){
       if(isPinErr(e)){pin="";store.set("salon.pin","");showPin("Кодът вече не е верен. Въведете новия.")}
       else if(isLocked(e))$("status").textContent="Твърде много грешни опити за код. Опитайте след 10 минути.";
@@ -423,7 +484,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
     }finally{busy=false}
   }
   async function loadClients(){try{clients=await api("getClients")}catch(e){}}
-  function showPin(msg){$("pinCard").hidden=false;$("main").hidden=true;$("setup").hidden=true;$("fab").hidden=true;$("settingsBtn").hidden=true;$("clientsBtn").hidden=true;$("pinMsg").textContent=msg||"";$("status").textContent="Нужен е код за вход."}
+  function showPin(msg){$("pinCard").hidden=false;$("main").hidden=true;$("setup").hidden=true;$("fab").hidden=true;$("settingsBtn").hidden=true;$("clientsBtn").hidden=true;$("monthBtn").hidden=true;$("pinMsg").textContent=msg||"";$("status").textContent="Нужен е код за вход."}
   $("pinForm").addEventListener("submit",async e=>{
     e.preventDefault();const v=$("pinInput").value.trim();if(!v)return;
     pin=v;
@@ -439,14 +500,17 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
     $("setup").hidden=!needSetup||away;
     if(needSetup&&!$("setupFields").children.length)for(let i=0;i<5;i++)addSetupField();
     $("main").hidden=needSetup||away;$("fab").hidden=needSetup||away;
-    $("settingsView").hidden=!inSettings;$("settingsBtn").hidden=needSetup;$("clientsBtn").hidden=needSetup;
+    $("settingsView").hidden=!inSettings;$("settingsBtn").hidden=needSetup;$("clientsBtn").hidden=needSetup;$("monthBtn").hidden=needSetup;
     $("clientsWrap").hidden=!inClients;$("wrap0").hidden=inClients;
     if(inSettings){renderManage();if(!svcDraft)renderSvcEdit();return}
     if(inClients)return;
     if(filter!=="all"&&!staffById(filter))filter="all";
     [...$("viewSeg").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===view)));
-    $("dayView").hidden=view!=="day";$("weekView").hidden=view!=="week";
-    renderStrip();renderFilter();
+    $("dayView").hidden=view!=="day";$("weekView").hidden=view!=="week";$("monthView").hidden=view!=="month";
+    $("weekNav").hidden=view==="month";$("strip").hidden=view==="month";
+    renderFilter();
+    if(view==="month"){renderMonth();return}
+    renderStrip();
     if(view==="day")renderDay();else renderWeek();
   }
 
@@ -518,7 +582,70 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
     if(keepLeft!=null)wrap.scrollLeft=keepLeft;
     else{const k=iso(now);if(k>=iso(weekStart)&&k<=iso(addDays(weekStart,6)))wrap.scrollLeft=Math.max(0,xOf(nowMin)-HOUR_W*1.5)}
   }
-  $("viewSeg").onclick=e=>{const b=e.target.closest("button");if(!b)return;view=b.dataset.v;store.set("salon.view",view);renderAll()};
+  $("viewSeg").onclick=e=>{const b=e.target.closest("button");if(!b)return;setView(b.dataset.v)};
+  function setView(v){
+    view=v;store.set("salon.view",view);
+    if(v==="month"){inSettings=false;inClients=false;renderAll();loadMonth();window.scrollTo(0,0)}else renderAll();
+  }
+  $("monthBtn").onclick=()=>setView("month");
+
+  /* ---------- 📅 месечен календар ---------- */
+  function gridStart(){return mondayOf(monthStart)}
+  function gridEnd(){const last=new Date(monthStart.getFullYear(),monthStart.getMonth()+1,0);return addDays(mondayOf(last),6)}
+  let mBusy=false;
+  async function loadMonth(){
+    if(mBusy||!pin)return;mBusy=true;
+    try{const r=await api("getWeek",iso(gridStart()),iso(gridEnd()));monthAppts=r.appts;staff=r.staff;services=r.services||services;if(view==="month"&&!inSettings&&!inClients)renderMonth()}
+    catch(e){}finally{mBusy=false}
+  }
+  function setMonth(d){monthStart=new Date(d.getFullYear(),d.getMonth(),1);monthAppts=[];renderMonth();loadMonth()}
+  $("mPrev").onclick=()=>setMonth(new Date(monthStart.getFullYear(),monthStart.getMonth()-1,1));
+  $("mNext").onclick=()=>setMonth(new Date(monthStart.getFullYear(),monthStart.getMonth()+1,1));
+  $("mToday").onclick=()=>{mSel=iso(new Date());setMonth(new Date())};
+  function renderMonth(){
+    $("mTitle").textContent=MONTHS[monthStart.getMonth()]+" "+monthStart.getFullYear();
+    const grid=$("mGrid");grid.textContent="";
+    DSHORT.forEach(n=>grid.append(el("div","wd",n)));
+    const today=iso(new Date()),end=gridEnd(),m=monthStart.getMonth();
+    const list=monthAppts.filter(a=>filter==="all"||a.staffId===filter);
+    for(let d=gridStart();d<=end;d=addDays(d,1)){
+      const k=iso(d),items=list.filter(a=>a.date===k).sort((x,y)=>x.start.localeCompare(y.start));
+      const b=el("button","mcell"+(d.getMonth()!==m?" out":"")+(k===today?" today":""));b.type="button";
+      b.setAttribute("aria-pressed",String(k===mSel));
+      b.setAttribute("aria-label",d.getDate()+" "+MONTHS[d.getMonth()]+", "+items.length+" часа");
+      b.append(el("span","n",String(d.getDate())));
+      if(items.length){
+        const dots=el("span","md");
+        items.slice(0,6).forEach(a=>{const i=el("i");i.style.setProperty("--c",colorOf(staffById(a.staffId)));dots.append(i)});
+        b.append(dots);
+        if(items.length>6)b.append(el("span","more","+"+(items.length-6)));
+      }
+      b.onclick=()=>{mSel=k;renderMonth()};
+      grid.append(b);
+    }
+    renderAgenda(list);
+  }
+  function renderAgenda(list){
+    const box=$("agenda");box.textContent="";
+    const d=parse(mSel),items=list.filter(a=>a.date===mSel).sort((x,y)=>x.start.localeCompare(y.start)||(x.staffId>y.staffId?1:-1));
+    const head=el("div","ah");
+    head.append(el("h3",null,DAYS[(d.getDay()+6)%7]+", "+d.getDate()+" "+MONTHS[d.getMonth()]));
+    const btns=el("div","actions");
+    const add=el("button","mini strong","+ Час");add.type="button";add.onclick=()=>openSheet(null,filter!=="all"?filter:null,mSel);
+    const open=el("button","mini","Отвори деня");open.type="button";
+    open.onclick=()=>{day=mSel;weekStart=mondayOf(parse(mSel));view="day";store.set("salon.view",view);renderAll();load();window.scrollTo(0,0)};
+    btns.append(add,open);head.append(btns);box.append(head);
+    if(!items.length){box.append(el("p","hint","Няма записани часове за този ден."));return}
+    const now=new Date(),nowKey=iso(now),nowMin=now.getHours()*60+now.getMinutes();
+    items.forEach(a=>{
+      const st=staffById(a.staffId);
+      const b=el("button","ag-item");b.type="button";b.style.setProperty("--c",colorOf(st));
+      if(mSel<nowKey||(mSel===nowKey&&toMin(a.end)<=nowMin))b.style.opacity=".6";
+      const t=el("span","t",a.start);t.append(el("small",null,"до "+a.end));
+      const c=el("span");c.append(el("span","s",a.service||"—"),el("span","w",(a.client||"")+(st?" · "+st.name:"")));
+      b.append(t,c);b.onclick=()=>openView(a);box.append(b);
+    });
+  }
   function renderStrip(){
     const end=addDays(weekStart,6);
     $("range").textContent=weekStart.getDate()+" "+MSHORT[weekStart.getMonth()]+" – "+end.getDate()+" "+MSHORT[end.getMonth()];
@@ -622,6 +749,29 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
     });
   }
 
+  function findClientFor(phone,name){
+    const ph=normPhone(phone),nm=String(name||"").trim().toLowerCase();
+    if(ph.length>=6){const c=clients.find(x=>normPhone(x.phone)===ph);if(c)return c}
+    if(!ph&&nm)return clients.find(x=>x.name.trim().toLowerCase()===nm)||null;
+    return null;
+  }
+
+  /* ---------- ⚙ Настройки → нов клиент ---------- */
+  $("ncSave").onclick=async()=>{
+    const c={name:$("ncName").value.trim(),phone:$("ncPhone").value.trim(),note:$("ncNote").value.trim()};
+    $("ncMsg").textContent="";
+    if(!c.name){$("ncMsg").textContent="Въведете име на клиента.";return}
+    const existing=findClientFor(c.phone,"");
+    if(existing&&existing.id)c.id=existing.id;
+    $("ncSave").disabled=true;
+    try{
+      clients=await api("saveClient",c);
+      $("ncName").value="";$("ncPhone").value="";$("ncNote").value="";
+      toast(existing?"Клиентът с този телефон е обновен":"Клиентът е добавен");
+    }catch(e){$("ncMsg").textContent="Не се запази. Проверете интернета и опитайте пак."}
+    finally{$("ncSave").disabled=false}
+  };
+
   /* ---------- 🔍 Клиенти: търсене и история ---------- */
   let cSelected=null;
   async function openClients(){
@@ -634,7 +784,20 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
   $("clientsBtn").onclick=()=>inClients?closeClients():openClients();
   $("clientsClose").onclick=closeClients;
   $("cSearch").addEventListener("input",renderClientList);
-  $("cBack").onclick=()=>{cSelected=null;$("cDetail").hidden=true;$("cListBox").hidden=false};
+  $("cBack").onclick=()=>{cSelected=null;$("cDetail").hidden=true;$("cListBox").hidden=false;renderClientList()};
+  $("ceCancel").onclick=()=>{$("cdEdit").hidden=true};
+  $("ceSave").onclick=async()=>{
+    const c=cSelected;if(!c)return;
+    const body={id:c.id||"",name:$("ceName").value.trim(),phone:$("cePhone").value.trim(),note:$("ceNote").value.trim()};
+    if(!body.name){$("ceMsg").textContent="Името не може да е празно.";return}
+    $("ceSave").disabled=true;
+    try{
+      clients=await api("saveClient",body);
+      const upd=findClientFor(body.phone,body.name)||Object.assign({},c,body);
+      toast("Клиентът е запазен");showClient(upd);
+    }catch(e){$("ceMsg").textContent="Не се запази. Проверете интернета и опитайте пак."}
+    finally{$("ceSave").disabled=false}
+  };
 
   function matchClients(q){
     q=q.trim();const ql=q.toLowerCase(),qd=normPhone(q);
@@ -653,7 +816,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
     list.forEach(c=>{
       const b=el("button","crow");b.type="button";
       const mid=el("span");mid.append(el("span","nm",c.name),el("span","ph",c.phone||"без телефон"));
-      const meta=el("span","meta");meta.append(el("b",null,shortDate(c.last)),document.createTextNode(c.count+(c.count===1?" посещение":" посещения")));
+      const meta=el("span","meta");meta.append(el("b",null,c.last?shortDate(c.last):"нов"),document.createTextNode(c.count+(c.count===1?" посещение":" посещения")));
       b.append(el("span","ini",initial(c.name)),mid,meta);
       b.onclick=()=>showClient(c);
       box.append(b);
@@ -663,6 +826,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
     cSelected=c;
     $("cListBox").hidden=true;$("cDetail").hidden=false;
     $("cdName").textContent=c.name;$("cdPhone").textContent=c.phone||"без телефон";
+    $("cdNote").textContent=c.note||"";$("cdNote").hidden=!c.note;$("cdEdit").hidden=true;$("ceMsg").textContent="";
     const tools=$("cdTools");tools.textContent="";
     const book=el("button","primary","+ Запиши час");book.type="button";
     book.onclick=()=>{inClients=false;renderAll();openSheet(null,null,null,null,{client:c.name,phone:c.phone||""})};
@@ -673,7 +837,10 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
       cp.onclick=async()=>{try{await navigator.clipboard.writeText(c.phone);toast("Копирано")}catch(e){}};
       tools.append(a,cp);
     }
-    $("cdSummary").textContent="Посещения: "+c.count+" · последно "+shortDate(c.last);
+    const ed=el("button","mini","✏️ Редактирай");ed.type="button";
+    ed.onclick=()=>{$("ceName").value=c.name;$("cePhone").value=c.phone||"";$("ceNote").value=c.note||"";$("cdEdit").hidden=!$("cdEdit").hidden;$("ceMsg").textContent=""};
+    tools.append(ed);
+    $("cdSummary").textContent=c.count?"Посещения: "+c.count+" · последно "+shortDate(c.last):"Още няма записани посещения.";
     const box=$("cdHist");box.textContent="";box.append(el("div","none","Зареждане…"));
     window.scrollTo(0,0);
     try{
@@ -737,7 +904,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
     if(!hits.length||(hits.length===1&&hits[0].name===$("fClient").value.trim()&&normPhone(hits[0].phone)===normPhone($("fPhone").value))){box.hidden=true;return}
     hits.forEach(c=>{
       const b=el("button");b.type="button";
-      b.append(el("b",null,c.name),el("span",null,(c.phone||"без телефон")+" · последно "+shortDate(c.last)+" · "+c.count+(c.count===1?" посещение":" посещения")));
+      b.append(el("b",null,c.name),el("span",null,(c.phone||"без телефон")+(c.last?" · последно "+shortDate(c.last)+" · "+c.count+(c.count===1?" посещение":" посещения"):" · без посещения")));
       b.onmousedown=e=>e.preventDefault();
       b.onclick=()=>{$("fClient").value=c.name;$("fPhone").value=c.phone||"";box.hidden=true;renderClientTools()};
       box.append(b);
@@ -760,7 +927,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
       cp.onclick=async()=>{try{await navigator.clipboard.writeText(p);toast("Копирано")}catch(e){$("fPhone").select()}};
       box.append(a,cp);
     }
-    if(c){
+    if(c&&c.count){
       const h=el("button","mini strong","История · "+c.count+(c.count===1?" посещение":" посещения"));h.type="button";
       h.onclick=()=>toggleHistory(c);
       box.append(h);
@@ -845,7 +1012,9 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
     const who=el("span");if(st){who.style.setProperty("--c",colorOf(st));who.append(el("i"))}who.append(document.createTextNode(st?st.name:(a.staffName||"—")));
     row("При",who);
     if(a.note)row("Бележка",a.note);
-    const par=appts.filter(o=>overlaps(o,a));
+    const cl=findClientFor(a.phone,a.client);
+    if(cl&&cl.note)row("За клиента",cl.note);
+    const par=(view==="month"?monthAppts:appts).filter(o=>overlaps(o,a));
     if(par.length)row("Паралелно с",par.map(o=>o.start+"–"+o.end+" "+(o.client||"")+(o.service?" ("+o.service+")":"")).join("; "));
     const tools=$("vTools");tools.textContent="";$("vHist").hidden=true;
     if(a.phone){
@@ -854,9 +1023,8 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
       cp.onclick=async()=>{try{await navigator.clipboard.writeText(a.phone);toast("Копирано")}catch(e){}};
       tools.append(call,cp);
     }
-    const ph=normPhone(a.phone);
-    const c=(ph.length>=6&&clients.find(x=>normPhone(x.phone)===ph))||(!ph&&clients.find(x=>x.name.trim().toLowerCase()===(a.client||"").trim().toLowerCase()));
-    if(c){const h=el("button","mini strong","История · "+c.count+(c.count===1?" посещение":" посещения"));h.type="button";h.onclick=()=>viewHistory(c);tools.append(h)}
+    const c=findClientFor(a.phone,a.client);
+    if(c&&c.count){const h=el("button","mini strong","История · "+c.count+(c.count===1?" посещение":" посещения"));h.type="button";h.onclick=()=>viewHistory(c);tools.append(h)}
     tools.hidden=!tools.children.length;
     $("viewSheet").hidden=false;$("viewBg").hidden=false;$("viewSheet").scrollTop=0;
   }
@@ -904,20 +1072,21 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
       const ws=mondayOf(parse(body.date));
       if(iso(ws)!==iso(weekStart)){weekStart=ws;appts=[saved]}
       if(view==="day")day=body.date;
+      if(view==="month"){mSel=body.date;const ms=parse(body.date);if(ms.getMonth()!==monthStart.getMonth()||ms.getFullYear()!==monthStart.getFullYear())monthStart=new Date(ms.getFullYear(),ms.getMonth(),1)}
       closeSheet();renderAll();
       if(more){
         const other=staff.find(s=>s.id!==body.staffId);
         openSheet(null,other?other.id:body.staffId,body.date,body.end,{client:body.client,phone:body.phone});
         toast("Записано. Изберете следващата процедура.");
       }else toast(wasEdit?"Промените са запазени":"Часът е записан");
-      load(true);loadClients();
+      load(true);loadClients();if(view==="month")loadMonth();
     }catch(err){$("formMsg").textContent=isPinErr(err)?"Кодът за вход е сменен. Презаредете страницата.":"Не се записа. Проверете интернета и опитайте пак."}
     finally{$("saveBtn").disabled=false;$("saveMoreBtn").disabled=false}
   }
   $("delBtn").onclick=async()=>{
     if(!editing)return;
     if(!delArmed){delArmed=true;$("delBtn").textContent="Натисни пак за изтриване";return}
-    try{await api("deleteAppt",editing.id);const id=editing.id;closeSheet();appts=appts.filter(a=>a.id!==id);renderAll();toast("Часът е изтрит");load(true);loadClients()}
+    try{await api("deleteAppt",editing.id);const id=editing.id;closeSheet();appts=appts.filter(a=>a.id!==id);renderAll();toast("Часът е изтрит");load(true);loadClients();if(view==="month")loadMonth()}
     catch(e){$("formMsg").textContent="Не се изтри. Опитайте пак."}
   };
 
@@ -943,7 +1112,7 @@ input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px sol
   };
 
   // опресняване на всеки 20 секунди, за да се виждат часовете, записани от колегите
-  setInterval(()=>{if(document.visibilityState==="visible"&&$("sheet").hidden&&$("viewSheet").hidden&&!inSettings&&!inClients&&pin)load(true)},20000);
+  setInterval(()=>{if(document.visibilityState==="visible"&&$("sheet").hidden&&$("viewSheet").hidden&&!inSettings&&!inClients&&pin){load(true);if(view==="month")loadMonth()}},20000);
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&pin&&!inSettings&&!inClients)load(true)});
 
   if(API_URL.indexOf("/exec")<0){$("status").textContent="Липсва линкът към Apps Script. Попълнете API_URL в началото на index.html.";return}
