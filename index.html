@@ -13,7 +13,7 @@
   // Линкът на уеб приложението от Apps Script (завършва на /exec):
   const API_URL = "https://script.google.com/macros/s/AKfycbydYJjpmKd2dNf424aG5CPGtWoq7ZGhP-vLzwHiPXayFPrpR7IomdtBkFOc_vpfKccs/exec";
   // Името, което се показва горе:
-  const SALON_NAME = "Чар";
+  const SALON_NAME = "Графикът на салона";
 </script>
 <meta name="theme-color" content="#D81B7A">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gloock&family=Manrope:wght@400;500;600;700;800&display=swap">
@@ -32,4 +32,836 @@
   --bg:#1A1020; --surface:#251829; --ink:#F8EDF5; --muted:#B79FB9; --line:#3B2840;
   --accent:#FF5FA8; --accent2:#FF9A6B; --accent-ink:#2A0A1A; --accent-soft:#3D1D33;
   --danger:#FF8A80; --info:#FFE08A; --info-bg:#3A3012;
-  --c0:#FF6F9F; --c1:#3FD3BE; --c2:#FFA552; --
+  --c0:#FF6F9F; --c1:#3FD3BE; --c2:#FFA552; --c3:#A88BFF; --c4:#64B5F6; --c5:#A5D66B; --c6:#FFD54F; --c7:#C3A89E;
+  --on-c:#1A1020;
+  color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:var(--body);font-size:15px;line-height:1.45;padding-bottom:110px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+
+.hero{background:linear-gradient(120deg,var(--accent) 0%,var(--accent2) 100%);color:#fff;
+  padding:calc(18px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 22px max(16px,env(safe-area-inset-left,0px));border-radius:0 0 26px 26px}
+.hero-in{max-width:680px;margin:0 auto;display:grid;gap:4px}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.hero h1{font-family:var(--display);font-weight:400;font-size:30px;line-height:1.1;margin:0;text-wrap:balance;min-width:0}
+.hero .sub{font-size:13px;opacity:.92}
+.gear{flex:none;width:44px;height:44px;border-radius:14px;border:0;background:rgb(255 255 255 / .22);color:#fff;display:grid;place-items:center}
+.gear svg{width:22px;height:22px}
+.hbtns{display:flex;gap:8px;flex:none}
+.wrap{max-width:680px;margin:0 auto;display:grid;gap:16px;padding:16px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+
+.weeknav{display:flex;align-items:center;gap:8px}
+.weeknav .range{flex:1;min-width:0;font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-size:18px;display:grid;place-items:center}
+.textbtn{height:40px;padding:0 14px;border-radius:12px;border:0;background:var(--accent-soft);color:var(--accent);font-weight:800;font-size:13px}
+
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.dbtn{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:7px 0;display:grid;justify-items:center;min-width:0}
+.dbtn .dw{font-size:11px;font-weight:800;letter-spacing:.04em;color:var(--muted);text-transform:uppercase}
+.dbtn .dn{font-size:19px;font-weight:800;font-variant-numeric:tabular-nums}
+.dbtn .dots{display:flex;gap:2px;min-height:8px;margin-top:2px}
+.dbtn .dots i{width:6px;height:6px;border-radius:50%;background:var(--c)}
+.dbtn.istoday .dn{color:var(--accent)}
+.dbtn[aria-pressed="true"]{background:linear-gradient(160deg,var(--accent),var(--accent2));border-color:transparent;color:#fff}
+.dbtn[aria-pressed="true"] .dw,.dbtn[aria-pressed="true"] .dn{color:#fff}
+.dbtn[aria-pressed="true"] .dots i{background:#fff}
+
+.dayhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.dayhead h2{font-family:var(--display);font-weight:400;font-size:25px;margin:0}
+.dayhead .cnt{color:var(--muted);font-size:13px}
+
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chip{flex:none;display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px 0 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:13px}
+.chip .dot{width:12px;height:12px;border-radius:50%;background:var(--c,var(--muted))}
+.chip[aria-pressed="true"]{background:var(--c,var(--accent));border-color:var(--c,var(--accent));color:#fff}
+.chip[aria-pressed="true"] .dot{background:#fff}
+
+.cols{display:grid;gap:12px}
+.col{border-radius:18px;padding:12px 14px;display:grid;gap:8px;background:color-mix(in srgb,var(--c) 9%,var(--surface));border:1.5px solid color-mix(in srgb,var(--c) 30%,transparent)}
+.colhead{display:flex;align-items:center;gap:10px}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:800;font-size:15px;flex:none}
+.colhead .nm{font-weight:800;font-size:16px;line-height:1.1}
+.colhead .ct{display:block;color:var(--muted);font-size:12px;font-weight:500}
+.colhead .add{margin-left:auto}
+.add{border:0;background:var(--c);color:#fff;font-weight:800;font-size:13px;height:36px;padding:0 14px;border-radius:11px}
+.list{display:grid;gap:6px}
+.appt{display:grid;grid-template-columns:60px 1fr;gap:12px;text-align:left;width:100%;background:var(--surface);border:0;border-left:5px solid var(--c);border-radius:12px;padding:10px 12px;box-shadow:0 1px 2px rgb(0 0 0 / .06)}
+.appt:hover{box-shadow:0 2px 8px rgb(0 0 0 / .12)}
+.appt .t{font-variant-numeric:tabular-nums;font-weight:800;font-size:16px;line-height:1.2;color:var(--c)}
+.appt .t small{display:block;font-weight:600;color:var(--muted);font-size:12px}
+.appt .c{min-width:0}
+.appt .svc{font-weight:700;overflow-wrap:anywhere;display:block}
+.appt .who{color:var(--muted);font-size:13px;overflow-wrap:anywhere;display:block}
+.appt .par{display:inline-block;margin-top:4px;font-size:11px;font-weight:800;color:var(--c);background:color-mix(in srgb,var(--c) 14%,transparent);border-radius:6px;padding:1px 6px}
+.appt.past{opacity:.55}
+.empty{color:var(--muted);font-size:13px;padding:4px 2px}
+.fab{position:fixed;right:max(16px,calc(env(safe-area-inset-right,0px) + 16px));bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:15;height:56px;padding:0 24px;border:0;border-radius:28px;background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;font-weight:800;font-size:16px;box-shadow:0 8px 24px rgb(216 27 122 / .35)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px;display:grid;gap:12px}
+.card h2{font-family:var(--display);font-weight:400;font-size:22px;margin:0}
+.field{display:grid;gap:4px;min-width:0}
+.field label{font-size:12px;font-weight:700;color:var(--muted)}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:12px;height:46px;padding:0 12px;width:100%;min-width:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.primary{height:48px;border-radius:14px;border:0;background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff;font-weight:800;font-size:15px;padding:0 20px}
+.secondary{height:48px;border-radius:14px;border:1.5px solid var(--line);background:transparent;font-weight:700;padding:0 16px}
+.danger{height:48px;border-radius:14px;border:0;background:transparent;color:var(--danger);font-weight:800;padding:0 8px}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.actions .grow{flex:1}
+.msg{font-size:13px;color:var(--danger)}
+.infobox{font-size:13px;color:var(--info);background:var(--info-bg);border-radius:12px;padding:10px 12px}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:14px}
+.tools a{color:var(--accent);font-weight:800}
+.mini{height:34px;border-radius:10px;border:1.5px solid var(--line);background:transparent;font-size:13px;font-weight:700;padding:0 12px}
+.mini.strong{border-color:var(--accent);color:var(--accent)}
+
+/* услуги във формуляра */
+.svcchips{display:flex;flex-wrap:wrap;gap:6px}
+.svcchips button{height:34px;border-radius:999px;border:1.5px solid transparent;background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:700;padding:0 12px}
+.svcchips button small{font-weight:600;opacity:.75;margin-left:4px}
+.svcchips button[aria-pressed="true"]{background:var(--accent);color:#fff}
+
+/* подсказки за клиенти */
+.sugg{display:grid;border:1.5px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.sugg button{display:grid;gap:1px;text-align:left;border:0;border-top:1px solid var(--line);background:transparent;padding:9px 12px}
+.sugg button:first-child{border-top:0}
+.sugg button:hover,.sugg button:focus-visible{background:var(--accent-soft)}
+.sugg b{font-weight:800}
+.sugg span{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* история на клиента */
+.hist{display:grid;gap:0;border:1.5px solid var(--line);border-radius:12px;overflow:hidden}
+.hist .h{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:8px 12px;border-top:1px solid var(--line);font-size:13px}
+.hist .h:first-child{border-top:0}
+.hist .d{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.hist .w{color:var(--muted);display:block}
+.hist .none{padding:10px 12px;color:var(--muted);font-size:13px}
+
+.sheet-bg{position:fixed;inset:0;background:rgb(20 4 16 / .45);z-index:20}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;background:var(--surface);border-radius:22px 22px 0 0;
+  padding:18px max(16px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  max-height:92vh;overflow:auto;box-shadow:0 -8px 30px rgb(0 0 0 / .25);border-top:5px solid var(--sc,var(--accent))}
+.sheet-inner{max-width:640px;margin:0 auto;display:grid;gap:12px}
+.sheet h2{font-family:var(--display);font-weight:400;font-size:23px;margin:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:700;font-size:14px}
+.staffrow{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center}
+.svcrow{display:grid;grid-template-columns:1fr 112px 40px;gap:8px;align-items:center}
+.svcrow .x{height:40px;border:0;background:transparent;color:var(--danger);font-size:20px;font-weight:800;border-radius:10px}
+.linkish{border:0;background:transparent;color:var(--accent);font-size:14px;font-weight:700;padding:0;justify-self:start;text-align:left}
+.settings-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.settings-head h2{font-family:var(--display);font-weight:400;font-size:28px;margin:0}
+/* търсене на клиенти */
+.csearch{height:50px;font-size:16px}
+.clist{display:grid;background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.crow{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;text-align:left;border:0;border-top:1px solid var(--line);background:transparent;padding:10px 14px;width:100%}
+.crow:first-child{border-top:0}
+.crow:hover{background:var(--accent-soft)}
+.crow .ini{width:40px;height:40px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:800}
+.crow .nm{font-weight:800;display:block;overflow-wrap:anywhere}
+.crow .ph{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.crow .meta{font-size:12px;color:var(--muted);text-align:right;line-height:1.3}
+.crow .meta b{display:block;color:var(--ink);font-size:13px}
+.clist .none{padding:14px;color:var(--muted);font-size:14px}
+.cd-name{font-family:var(--display);font-weight:400;font-size:26px;margin:0;overflow-wrap:anywhere}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .2s ease-out}@keyframes up{from{transform:translateY(24px);opacity:.6}}}
+
+/* превключвател Ден | Седмица */
+.viewseg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:3px;gap:3px}
+.viewseg button{border:0;background:transparent;height:38px;border-radius:11px;font-weight:800;font-size:14px;color:var(--muted)}
+.viewseg button[aria-pressed="true"]{background:linear-gradient(120deg,var(--accent),var(--accent2));color:#fff}
+
+/* седмичен изглед */
+.wk{overflow-x:auto;border-radius:16px;border:1px solid var(--line);background:var(--surface);-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.wk-in{width:max-content}
+.wk-day{border-top:2px solid var(--line)}
+.wk-day:first-child{border-top:0}
+.wk-head{display:flex;height:36px;background:var(--accent-soft)}
+.wk-label{position:sticky;left:0;z-index:3;width:var(--nw);flex:none;display:flex;align-items:center;gap:6px;padding:0 10px;font-weight:800;font-size:13px;background:var(--accent-soft);border:0;text-align:left;color:var(--ink)}
+.wk-label small{color:var(--muted);font-weight:600}
+.wk-day.today .wk-head,.wk-day.today .wk-label{background:var(--accent);color:#fff}
+.wk-day.today .wk-label small,.wk-day.today .wk-hours span{color:#fff}
+.wk-hours{position:relative;width:var(--tw);flex:none}
+.wk-hours span{position:absolute;bottom:5px;transform:translateX(-50%);font-size:11px;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.wk-hours span:first-child{transform:none;margin-left:3px}
+.wk-row{display:flex;min-height:42px;border-top:1px solid var(--line)}
+.wk-name{position:sticky;left:0;z-index:2;width:var(--nw);flex:none;display:flex;align-items:center;gap:7px;padding:0 10px;background:var(--surface);font-size:13px;font-weight:700;border-right:1px solid var(--line);min-width:0}
+.wk-name i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.wk-name span{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.wk-track{position:relative;width:var(--tw);flex:none;cursor:copy;
+  background-image:linear-gradient(to right,var(--line) 1px,transparent 1px),linear-gradient(to right,color-mix(in srgb,var(--line) 45%,transparent) 1px,transparent 1px);
+  background-size:var(--hw) 100%,calc(var(--hw) / 2) 100%}
+.wk-track:hover{background-color:color-mix(in srgb,var(--accent) 4%,transparent)}
+.wk-bar{position:absolute;border:0;border-radius:7px;background:var(--c);color:var(--on-c);font-size:11px;font-weight:700;line-height:1.15;padding:2px 6px;text-align:left;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;box-shadow:0 1px 2px rgb(0 0 0 / .15)}
+.wk-bar.past{opacity:.5}
+.wk-now{position:absolute;top:0;bottom:0;width:2px;background:var(--danger);pointer-events:none;z-index:1}
+.wk-hint{font-size:13px;color:var(--muted);margin:0}
+</style>
+</head>
+<body>
+<header class="hero"><div class="hero-in">
+  <div class="hero-top">
+    <h1 id="salonName">Графикът на салона</h1>
+    <div class="hbtns">
+    <button class="gear" id="clientsBtn" aria-label="Клиенти" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
+    <button class="gear" id="settingsBtn" aria-label="Настройки" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+    </div>
+  </div>
+  <div class="sub" id="status">Зареждане…</div>
+</div></header>
+
+<div class="wrap" id="wrap0">
+  <section class="card" id="pinCard" hidden>
+    <h2>Вход за екипа</h2>
+    <p class="hint">Въведете кода на салона. Телефонът ще го запомни.</p>
+    <form id="pinForm" class="actions">
+      <input id="pinInput" type="password" inputmode="numeric" autocomplete="off" placeholder="Код" style="flex:1">
+      <button class="primary" type="submit">Влез</button>
+    </form>
+    <div class="msg" id="pinMsg"></div>
+  </section>
+
+  <section class="card" id="setup" hidden>
+    <h2>Кой работи в салона?</h2>
+    <p class="hint">Въведете имената на служителите. Всеки ще има свой график, в който целият екип може да записва клиенти.</p>
+    <div id="setupFields" style="display:grid;gap:8px"></div>
+    <div class="actions"><button class="secondary" id="setupMore">+ Още един</button><span class="grow"></span><button class="primary" id="setupSave">Запази</button></div>
+    <div class="msg" id="setupMsg"></div>
+  </section>
+
+  <div id="main" style="display:grid;gap:16px" hidden>
+    <div class="weeknav">
+      <button class="iconbtn" id="prev" aria-label="Предишна седмица">‹</button>
+      <div class="range" id="range"></div>
+      <button class="iconbtn" id="next" aria-label="Следваща седмица">›</button>
+      <button class="textbtn" id="todayBtn">Днес</button>
+    </div>
+    <div class="viewseg" id="viewSeg">
+      <button type="button" data-v="day" aria-pressed="true">Ден</button>
+      <button type="button" data-v="week" aria-pressed="false">Седмица</button>
+    </div>
+    <div class="strip" id="strip"></div>
+    <div class="chips" id="filterChips"></div>
+    <div id="dayView" style="display:grid;gap:16px">
+      <div class="dayhead"><h2 id="dayTitle"></h2><span class="cnt" id="dayCount"></span></div>
+      <section class="cols" id="cols"></section>
+    </div>
+    <div id="weekView" style="display:grid;gap:8px" hidden></div>
+  </div>
+
+  <div id="settingsView" style="display:grid;gap:16px" hidden>
+    <div class="settings-head"><h2>Настройки</h2><button class="secondary" id="settingsClose">Готово</button></div>
+    <section class="card">
+      <h2>Услуги</h2>
+      <p class="hint">Когато изберете услуга при записване, продължителността се попълва сама. При няколко услуги времената се събират.</p>
+      <div id="svcEdit" style="display:grid;gap:8px"></div>
+      <div class="actions"><button class="secondary" id="svcAdd">+ Добави услуга</button><span class="grow"></span><button class="primary" id="svcSave">Запази услугите</button></div>
+      <div class="msg" id="svcMsg"></div>
+    </section>
+    <section class="card">
+      <h2>Служители</h2>
+      <div id="manageList" style="display:grid;gap:8px"></div>
+      <div class="actions"><input id="newStaff" placeholder="Ново име" style="flex:1"><button class="primary" id="addStaffBtn">Добави</button></div>
+      <div class="msg" id="manageMsg"></div>
+    </section>
+  </div>
+</div>
+
+<div class="wrap" id="clientsWrap" hidden>
+  <div id="clientsView" style="display:grid;gap:14px">
+    <div class="settings-head"><h2>Клиенти</h2><button class="secondary" id="clientsClose">Готово</button></div>
+    <div id="cListBox" style="display:grid;gap:10px">
+      <input id="cSearch" class="csearch" type="search" placeholder="Търсене по име или телефон" autocomplete="off" aria-label="Търсене на клиент">
+      <p class="hint" id="cCount"></p>
+      <div class="clist" id="cList"></div>
+    </div>
+    <section class="card" id="cDetail" hidden>
+      <button class="linkish" id="cBack" type="button">← Всички клиенти</button>
+      <div><h2 class="cd-name" id="cdName"></h2><div class="hint" id="cdPhone"></div></div>
+      <div class="tools" id="cdTools"></div>
+      <div class="label-h hint" id="cdSummary"></div>
+      <div class="hist" id="cdHist"></div>
+    </section>
+  </div>
+</div>
+
+<button class="fab" id="fab" hidden>+ Запиши час</button>
+
+<div id="sheetBg" class="sheet-bg" hidden></div>
+<div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+  <form class="sheet-inner" id="form" autocomplete="off">
+    <h2 id="sheetTitle">Нов час</h2>
+    <div class="field"><label for="fClient">Клиент</label><input id="fClient" maxlength="80" placeholder="Име или първите букви" autocomplete="off"></div>
+    <div class="field"><label for="fPhone">Телефон</label><input id="fPhone" type="tel" inputmode="tel" maxlength="30" placeholder="08…" autocomplete="off"></div>
+    <div class="sugg" id="sugg" hidden></div>
+    <div class="tools" id="clientTools" hidden></div>
+    <div class="hist" id="histBox" hidden></div>
+    <div class="field"><label for="fStaff">При кого</label><select id="fStaff"></select></div>
+    <div class="field"><label>Услуга</label>
+      <div class="svcchips" id="svcChips"></div>
+      <input id="fSvc" maxlength="120" placeholder="или напишете процедурата" aria-label="Процедура">
+    </div>
+    <div class="row2">
+      <div class="field"><label for="fDate">Ден</label><input type="date" id="fDate" required></div>
+      <div class="field"><label for="fStart">Час</label><input type="time" id="fStart" step="900" required></div>
+    </div>
+    <div class="field"><label for="fDur">Продължителност</label><select id="fDur"></select></div>
+    <div class="field"><label for="fNote">Бележка (по желание)</label><input id="fNote" maxlength="160" placeholder="напр. носи снимка, капаро платено"></div>
+    <div class="infobox" id="overlapInfo" hidden></div>
+    <div class="msg" id="formMsg"></div>
+    <div class="actions">
+      <button type="button" class="danger" id="delBtn" hidden>Изтрий</button>
+      <span class="grow"></span>
+      <button type="button" class="secondary" id="cancelBtn">Отказ</button>
+      <button type="submit" class="primary" id="saveBtn">Запиши</button>
+    </div>
+    <button type="button" class="secondary" id="saveMoreBtn">Запиши + още процедура за клиента</button>
+  </form>
+</div>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+(function(){
+  const DAYS=["Понеделник","Вторник","Сряда","Четвъртък","Петък","Събота","Неделя"];
+  const DSHORT=["Пн","Вт","Ср","Чт","Пт","Сб","Нд"];
+  const MONTHS=["януари","февруари","март","април","май","юни","юли","август","септември","октомври","ноември","декември"];
+  const MSHORT=["ян","фев","мар","апр","май","юни","юли","авг","сеп","окт","ное","дек"];
+  // Работно време за седмичния изглед (часове). Сменете ги, ако салонът работи по друго време.
+  const DAY_START=8, DAY_END=20, HOUR_W=60, NAME_W=96;
+  const $=id=>document.getElementById(id);
+  const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+
+  let pin=store.get("salon.pin")||"";
+  let staff=[],appts=[],services=[],clients=[],loaded=false,busy=false;
+  let filter=store.get("salon.filter")||"all";
+  let view=store.get("salon.view")==="week"?"week":"day";
+  let weekStart=mondayOf(new Date()),day=iso(new Date()),editing=null,delArmed=false,svcDraft=null;
+
+  // Връзка с Google таблицата през Apps Script
+  async function api(fn){
+    const args=[].slice.call(arguments,1);
+    const r=await fetch(API_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({fn:fn,args:[pin].concat(args)})});
+    const j=await r.json();
+    if(!j.ok)throw new Error(j.error||"ERROR");
+    return j.data;
+  }
+  function isPinErr(e){return String(e&&e.message||e).indexOf("WRONG_PIN")>=0}
+  function isLocked(e){return String(e&&e.message||e).indexOf("LOCKED")>=0}
+  document.title=SALON_NAME;$("salonName").textContent=SALON_NAME;
+
+  function pad(n){return String(n).padStart(2,"0")}
+  function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+  function parse(s){const p=s.split("-").map(Number);return new Date(p[0],p[1]-1,p[2])}
+  function mondayOf(d){const x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x}
+  function addDays(d,n){const x=new Date(d);x.setDate(x.getDate()+n);return x}
+  function toMin(t){const p=t.split(":").map(Number);return p[0]*60+p[1]}
+  function fromMin(m){m=Math.min(m,24*60-1);return pad(Math.floor(m/60))+":"+pad(m%60)}
+  function durLabel(m){const h=Math.floor(m/60),r=m%60;return h?(h+" ч"+(r?" "+r+" мин":"")):(r+" мин")}
+  function shortDate(s){const d=parse(s);return d.getDate()+" "+MSHORT[d.getMonth()]+(d.getFullYear()!==new Date().getFullYear()?" "+d.getFullYear():"")}
+  function colorOf(s){return "var(--c"+(((s&&s.color)||0)%8)+")"}
+  function staffById(id){return staff.find(s=>s.id===id)}
+  function el(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e}
+  function toast(t){const e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2000)}
+  function initial(n){return (n||"?").trim().charAt(0).toUpperCase()}
+  // Телефон без интервали; +359 става 0 (същото правило като в таблицата)
+  function normPhone(p){let d=String(p||"").replace(/\D/g,"");if(d.indexOf("00359")===0)d="0"+d.slice(5);else if(d.indexOf("359")===0&&d.length>=11)d="0"+d.slice(3);return d}
+  function overlaps(a,b){return a.staffId===b.staffId&&a.date===b.date&&a.id!==b.id&&toMin(a.start)<toMin(b.end)&&toMin(b.start)<toMin(a.end)}
+
+  /* ---------- зареждане ---------- */
+  async function load(quiet){
+    if(!pin){showPin();return}
+    if(busy)return;busy=true;
+    if(!quiet)$("status").textContent="Зареждане…";
+    try{
+      const r=await api("getWeek",iso(weekStart),iso(addDays(weekStart,6)));
+      staff=r.staff;appts=r.appts;services=r.services||[];
+      const first=!loaded;loaded=true;
+      $("status").textContent="Изберете ден и натиснете „+ Час“ при служителя.";
+      renderAll();
+      if(first)loadClients();
+    }catch(e){
+      if(isPinErr(e)){pin="";store.set("salon.pin","");showPin("Кодът вече не е верен. Въведете новия.")}
+      else if(isLocked(e))$("status").textContent="Твърде много грешни опити за код. Опитайте след 10 минути.";
+      else $("status").textContent="Няма връзка. Проверете интернета.";
+    }finally{busy=false}
+  }
+  async function loadClients(){try{clients=await api("getClients")}catch(e){}}
+  function showPin(msg){$("pinCard").hidden=false;$("main").hidden=true;$("setup").hidden=true;$("fab").hidden=true;$("settingsBtn").hidden=true;$("clientsBtn").hidden=true;$("pinMsg").textContent=msg||"";$("status").textContent="Нужен е код за вход."}
+  $("pinForm").addEventListener("submit",async e=>{
+    e.preventDefault();const v=$("pinInput").value.trim();if(!v)return;
+    pin=v;
+    try{await api("login");store.set("salon.pin",v);$("pinCard").hidden=true;$("pinInput").value="";load()}
+    catch(err){pin="";$("pinMsg").textContent=isPinErr(err)?"Грешен код. Опитайте пак.":isLocked(err)?"Твърде много грешни опити. Опитайте след 10 минути.":"Няма връзка. Опитайте пак."}
+  });
+
+  /* ---------- изглед ---------- */
+  let inSettings=false,inClients=false;
+  function renderAll(){
+    if(!loaded)return;
+    const needSetup=staff.length===0,away=inSettings||inClients;
+    $("setup").hidden=!needSetup||away;
+    if(needSetup&&!$("setupFields").children.length)for(let i=0;i<5;i++)addSetupField();
+    $("main").hidden=needSetup||away;$("fab").hidden=needSetup||away;
+    $("settingsView").hidden=!inSettings;$("settingsBtn").hidden=needSetup;$("clientsBtn").hidden=needSetup;
+    $("clientsWrap").hidden=!inClients;$("wrap0").hidden=inClients;
+    if(inSettings){renderManage();if(!svcDraft)renderSvcEdit();return}
+    if(inClients)return;
+    if(filter!=="all"&&!staffById(filter))filter="all";
+    [...$("viewSeg").children].forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===view)));
+    $("dayView").hidden=view!=="day";$("weekView").hidden=view!=="week";
+    renderStrip();renderFilter();
+    if(view==="day")renderDay();else renderWeek();
+  }
+
+  /* ---------- седмичен изглед: дни × служители × часове ---------- */
+  // Разпределя застъпващите се часове в „ленти“, за да се виждат един под друг.
+  function lanesFor(list){
+    const sorted=list.slice().sort((a,b)=>a.start.localeCompare(b.start)),ends=[];
+    sorted.forEach(a=>{let i=ends.findIndex(e=>e<=toMin(a.start));if(i<0){i=ends.length;ends.push(0)}ends[i]=toMin(a.end);a._lane=i});
+    return Math.max(1,ends.length);
+  }
+  function renderWeek(){
+    const box=$("weekView");
+    const prev=box.querySelector(".wk"),keepLeft=prev?prev.scrollLeft:null;
+    let h0=DAY_START,h1=DAY_END;
+    appts.forEach(a=>{h0=Math.min(h0,Math.floor(toMin(a.start)/60));h1=Math.max(h1,Math.ceil(toMin(a.end)/60))});
+    const tw=(h1-h0)*HOUR_W;
+    const shown=filter==="all"?staff:staff.filter(s=>s.id===filter);
+    const now=new Date(),todayKey=iso(now),nowMin=now.getHours()*60+now.getMinutes();
+    const xOf=m=>(m-h0*60)/60*HOUR_W;
+    const LANE_H=30;
+
+    const wrap=el("div","wk");
+    wrap.style.setProperty("--nw",NAME_W+"px");wrap.style.setProperty("--tw",tw+"px");wrap.style.setProperty("--hw",HOUR_W+"px");
+    const inner=el("div","wk-in");
+    for(let i=0;i<7;i++){
+      const d=addDays(weekStart,i),k=iso(d);
+      const block=el("div","wk-day"+(k===todayKey?" today":""));
+      const head=el("div","wk-head");
+      const lbl=el("button","wk-label");lbl.type="button";
+      lbl.append(document.createTextNode(DSHORT[i]+" "),el("small",null,d.getDate()+" "+MSHORT[d.getMonth()]));
+      lbl.title="Отвори деня";lbl.onclick=()=>{day=k;view="day";store.set("salon.view",view);renderAll();window.scrollTo(0,0)};
+      const hrs=el("div","wk-hours");
+      for(let h=h0;h<h1;h++){const t=el("span",null,pad(h)+":00");t.style.left=((h-h0)*HOUR_W)+"px";hrs.append(t)}
+      head.append(lbl,hrs);block.append(head);
+      shown.forEach(s=>{
+        const mine=appts.filter(a=>a.date===k&&a.staffId===s.id).map(a=>Object.assign({},a));
+        const lanes=lanesFor(mine);
+        const row=el("div","wk-row");row.style.setProperty("--c",colorOf(s));
+        row.style.height=Math.max(42,lanes*LANE_H+8)+"px";
+        const nm=el("div","wk-name");nm.append(el("i"),el("span",null,s.name));
+        const tr=el("div","wk-track");
+        tr.setAttribute("aria-label","Свободно място при "+s.name+", "+DAYS[i]);
+        tr.onclick=e=>{
+          const r=tr.getBoundingClientRect();
+          const m=h0*60+Math.floor((e.clientX-r.left)/HOUR_W*2)*30;
+          openSheet(null,s.id,k,fromMin(Math.max(h0*60,m)));
+        };
+        const barH=Math.floor(((lanes===1?34:lanes*LANE_H)-(lanes-1)*3)/lanes);
+        mine.forEach(a=>{
+          const orig=appts.find(x=>x.id===a.id);
+          const b=el("button","wk-bar"+((k<todayKey||(k===todayKey&&toMin(a.end)<=nowMin))?" past":""));
+          b.type="button";
+          b.style.left=xOf(toMin(a.start))+"px";
+          b.style.width=Math.max(8,xOf(toMin(a.end))-xOf(toMin(a.start))-2)+"px";
+          b.style.top=(4+a._lane*(barH+3))+"px";b.style.height=barH+"px";
+          b.textContent=a.start+" "+(a.client||"")+(a.service?" · "+a.service:"");
+          b.title=a.start+"–"+a.end+" "+(a.client||"")+" · "+(a.service||"");
+          b.onclick=e=>{e.stopPropagation();openSheet(orig)};
+          tr.append(b);
+        });
+        if(k===todayKey&&nowMin>=h0*60&&nowMin<=h1*60){const n=el("div","wk-now");n.style.left=xOf(nowMin)+"px";tr.append(n)}
+        row.append(nm,tr);block.append(row);
+      });
+      inner.append(block);
+    }
+    wrap.append(inner);
+    const hint=el("p","wk-hint","Докоснете празно място, за да запишете час там. Плъзнете настрани за следобеда.");
+    box.replaceChildren(hint,wrap);
+    if(keepLeft!=null)wrap.scrollLeft=keepLeft;
+    else{const k=iso(now);if(k>=iso(weekStart)&&k<=iso(addDays(weekStart,6)))wrap.scrollLeft=Math.max(0,xOf(nowMin)-HOUR_W*1.5)}
+  }
+  $("viewSeg").onclick=e=>{const b=e.target.closest("button");if(!b)return;view=b.dataset.v;store.set("salon.view",view);renderAll()};
+  function renderStrip(){
+    const end=addDays(weekStart,6);
+    $("range").textContent=weekStart.getDate()+" "+MSHORT[weekStart.getMonth()]+" – "+end.getDate()+" "+MSHORT[end.getMonth()];
+    const box=$("strip");box.textContent="";const today=iso(new Date());
+    for(let i=0;i<7;i++){
+      const d=addDays(weekStart,i),k=iso(d);
+      const list=appts.filter(a=>a.date===k&&(filter==="all"||a.staffId===filter));
+      const b=el("button","dbtn"+(k===today?" istoday":""));b.setAttribute("aria-pressed",String(k===day));
+      b.setAttribute("aria-label",DAYS[i]+" "+d.getDate()+" "+MONTHS[d.getMonth()]+", "+list.length+" часа");
+      const dots=el("span","dots");
+      list.slice(0,5).forEach(a=>{const dot=el("i");dot.style.setProperty("--c",colorOf(staffById(a.staffId)));dots.append(dot)});
+      b.append(el("span","dw",DSHORT[i]),el("span","dn",String(d.getDate())),dots);
+      b.onclick=()=>{day=k;if(view==="week"){view="day";store.set("salon.view",view)}renderAll()};box.append(b);
+    }
+  }
+  function renderFilter(){
+    const box=$("filterChips");box.textContent="";
+    if(staff.length<2){box.hidden=true;return}box.hidden=false;
+    const mk=(id,name,c)=>{const b=el("button","chip");if(c)b.style.setProperty("--c",c);b.setAttribute("aria-pressed",String(filter===id));
+      b.append(el("span","dot"),document.createTextNode(name));
+      b.onclick=()=>{filter=id;store.set("salon.filter",id);renderAll()};box.append(b)};
+    mk("all","Всички");staff.forEach(s=>mk(s.id,s.name,colorOf(s)));
+  }
+  function renderDay(){
+    const d=parse(day);
+    $("dayTitle").textContent=DAYS[(d.getDay()+6)%7]+", "+d.getDate()+" "+MONTHS[d.getMonth()];
+    const todays=appts.filter(a=>a.date===day);
+    $("dayCount").textContent=todays.length?(todays.length===1?"1 записан час":todays.length+" записани часа"):"";
+    const box=$("cols");box.textContent="";
+    const shown=filter==="all"?staff:staff.filter(s=>s.id===filter);
+    const now=new Date(),nowKey=iso(now),nowMin=now.getHours()*60+now.getMinutes();
+    shown.forEach(s=>{
+      const col=el("article","col");col.style.setProperty("--c",colorOf(s));
+      const mine=todays.filter(a=>a.staffId===s.id).sort((x,y)=>x.start.localeCompare(y.start));
+      const head=el("div","colhead");
+      const nm=el("div");nm.append(el("span","nm",s.name),el("span","ct",mine.length?mine.length+(mine.length===1?" час":" часа"):"свободен ден"));
+      const add=el("button","add","+ Час");add.setAttribute("aria-label","Запиши час при "+s.name);add.onclick=()=>openSheet(null,s.id);
+      head.append(el("span","avatar",initial(s.name)),nm,add);col.append(head);
+      const list=el("div","list");
+      if(!mine.length)list.append(el("div","empty","Няма записани клиенти"));
+      mine.forEach(a=>{
+        const past=day<nowKey||(day===nowKey&&toMin(a.end)<=nowMin);
+        const b=el("button","appt"+(past?" past":""));
+        const t=el("span","t",a.start);t.append(el("small",null,"до "+a.end));
+        const c=el("span","c");c.append(el("span","svc",a.service||"—"));
+        c.append(el("span","who",(a.client||"")+(a.phone?" · "+a.phone:"")));
+        if(a.note)c.append(el("span","who",a.note));
+        if(mine.some(o=>overlaps(o,a)))c.append(el("span","par","паралелно"));
+        b.append(t,c);b.onclick=()=>openSheet(a);list.append(b);
+      });
+      col.append(list);box.append(col);
+    });
+  }
+  function addSetupField(){const box=$("setupFields");const i=box.children.length;const inp=el("input");inp.id="setup-"+i;inp.placeholder="Име на служител "+(i+1);inp.setAttribute("aria-label","Име на служител "+(i+1));box.append(inp)}
+
+  /* ---------- ⚙ Настройки ---------- */
+  function openSettings(){inClients=false;inSettings=true;svcDraft=null;$("svcMsg").textContent="";$("manageMsg").textContent="";renderAll();window.scrollTo(0,0)}
+  function closeSettings(){inSettings=false;svcDraft=null;renderAll();window.scrollTo(0,0)}
+  $("settingsBtn").onclick=()=>inSettings?closeSettings():openSettings();
+  $("settingsClose").onclick=closeSettings;
+
+  function durOptions(sel,value){
+    sel.textContent="";
+    for(let m=15;m<=480;m+=15){const o=el("option",null,durLabel(m));o.value=String(m);sel.append(o)}
+    if(value&&![...sel.options].some(o=>+o.value===+value)){const o=el("option",null,durLabel(+value));o.value=String(value);sel.append(o)}
+    sel.value=String(value||60);
+  }
+  function renderSvcEdit(){
+    if(!svcDraft)svcDraft=services.map(s=>({id:s.id,name:s.name,minutes:s.minutes}));
+    const box=$("svcEdit");box.textContent="";
+    if(!svcDraft.length)box.append(el("p","hint","Няма добавени услуги."));
+    svcDraft.forEach((s,i)=>{
+      const r=el("div","svcrow");
+      const n=el("input");n.value=s.name;n.placeholder="Име на услугата";n.id="svc-n-"+i;n.setAttribute("aria-label","Услуга");
+      n.oninput=()=>{s.name=n.value};
+      const m=el("select");m.id="svc-m-"+i;m.setAttribute("aria-label","Времетраене");durOptions(m,s.minutes);
+      m.onchange=()=>{s.minutes=+m.value};
+      const x=el("button","x","×");x.type="button";x.setAttribute("aria-label","Махни "+s.name);
+      x.onclick=()=>{svcDraft.splice(i,1);renderSvcEdit()};
+      r.append(n,m,x);box.append(r);
+    });
+  }
+  $("svcAdd").onclick=()=>{svcDraft.push({id:"",name:"",minutes:30});renderSvcEdit();const ins=$("svcEdit").querySelectorAll("input");if(ins.length)ins[ins.length-1].focus()};
+  $("svcSave").onclick=async()=>{
+    $("svcSave").disabled=true;$("svcMsg").textContent="";
+    try{services=await api("saveServices",svcDraft.filter(s=>s.name.trim()));svcDraft=null;renderSvcEdit();toast("Услугите са запазени")}
+    catch(e){$("svcMsg").textContent="Не се запазиха. Проверете интернета и опитайте пак."}
+    finally{$("svcSave").disabled=false}
+  };
+  function renderManage(){
+    const box=$("manageList");box.textContent="";
+    staff.forEach(s=>{
+      const r=el("div","staffrow");r.style.setProperty("--c",colorOf(s));
+      const inp=el("input");inp.value=s.name;inp.id="staff-"+s.id;inp.setAttribute("aria-label","Име");
+      const del=el("button","danger","Махни");del.style.height="40px";
+      inp.onchange=async()=>{const v=inp.value.trim();if(!v||v===s.name)return;try{staff=await api("renameStaff",s.id,v);renderAll();toast("Запазено")}catch(e){$("manageMsg").textContent="Не се запази. Опитайте пак."}};
+      let armed=false;
+      del.onclick=async()=>{if(!armed){armed=true;del.textContent="Сигурно?";setTimeout(()=>{armed=false;del.textContent="Махни"},3000);return}
+        try{staff=await api("removeStaff",s.id);renderAll();toast("Премахнат")}catch(e){$("manageMsg").textContent="Не се премахна. Опитайте пак."}};
+      r.append(el("span","avatar",initial(s.name)),inp,del);box.append(r);
+    });
+  }
+
+  /* ---------- 🔍 Клиенти: търсене и история ---------- */
+  let cSelected=null;
+  async function openClients(){
+    inSettings=false;inClients=true;cSelected=null;
+    $("cDetail").hidden=true;$("cListBox").hidden=false;$("cSearch").value="";
+    renderAll();renderClientList();window.scrollTo(0,0);
+    await loadClients();renderClientList();
+  }
+  function closeClients(){inClients=false;cSelected=null;renderAll();window.scrollTo(0,0)}
+  $("clientsBtn").onclick=()=>inClients?closeClients():openClients();
+  $("clientsClose").onclick=closeClients;
+  $("cSearch").addEventListener("input",renderClientList);
+  $("cBack").onclick=()=>{cSelected=null;$("cDetail").hidden=true;$("cListBox").hidden=false};
+
+  function matchClients(q){
+    q=q.trim();const ql=q.toLowerCase(),qd=normPhone(q);
+    if(!q)return clients.slice(0,30);
+    return clients.filter(c=>{
+      const n=c.name.toLowerCase();
+      if(n.indexOf(ql)===0||n.indexOf(" "+ql)>=0)return true;
+      return qd.length>=2&&normPhone(c.phone).indexOf(qd)>=0;
+    }).slice(0,60);
+  }
+  function renderClientList(){
+    const q=$("cSearch").value,list=matchClients(q),box=$("cList");
+    box.textContent="";
+    $("cCount").textContent=q.trim()?(list.length?"Намерени: "+list.length:""):(clients.length?"Последни клиенти ("+clients.length+" общо)":"");
+    if(!list.length){box.append(el("div","none",clients.length?"Няма клиент с това име или телефон.":"Още няма записани клиенти. Те се появяват тук след първия записан час."));return}
+    list.forEach(c=>{
+      const b=el("button","crow");b.type="button";
+      const mid=el("span");mid.append(el("span","nm",c.name),el("span","ph",c.phone||"без телефон"));
+      const meta=el("span","meta");meta.append(el("b",null,shortDate(c.last)),document.createTextNode(c.count+(c.count===1?" посещение":" посещения")));
+      b.append(el("span","ini",initial(c.name)),mid,meta);
+      b.onclick=()=>showClient(c);
+      box.append(b);
+    });
+  }
+  async function showClient(c){
+    cSelected=c;
+    $("cListBox").hidden=true;$("cDetail").hidden=false;
+    $("cdName").textContent=c.name;$("cdPhone").textContent=c.phone||"без телефон";
+    const tools=$("cdTools");tools.textContent="";
+    const book=el("button","primary","+ Запиши час");book.type="button";
+    book.onclick=()=>{inClients=false;renderAll();openSheet(null,null,null,null,{client:c.name,phone:c.phone||""})};
+    tools.append(book);
+    if(c.phone){
+      const a=el("a",null,"Обади се");a.href="tel:"+c.phone.replace(/[^\d+]/g,"");
+      const cp=el("button","mini","Копирай номера");cp.type="button";
+      cp.onclick=async()=>{try{await navigator.clipboard.writeText(c.phone);toast("Копирано")}catch(e){}};
+      tools.append(a,cp);
+    }
+    $("cdSummary").textContent="Посещения: "+c.count+" · последно "+shortDate(c.last);
+    const box=$("cdHist");box.textContent="";box.append(el("div","none","Зареждане…"));
+    window.scrollTo(0,0);
+    try{
+      const list=await api("getHistory",c.phone||"",c.phone?"":c.name);
+      if(cSelected!==c)return;
+      box.textContent="";
+      if(!list.length){box.append(el("div","none","Няма записани посещения."));return}
+      const now=new Date(),today=iso(now),nowMin=now.getHours()*60+now.getMinutes();
+      list.forEach(a=>{
+        const r=el("div","h");
+        const upcoming=a.date>today||(a.date===today&&toMin(a.start)>nowMin);
+        const d=el("span","d",shortDate(a.date));d.append(el("span","w",a.start+(upcoming?" · предстои":"")));
+        const w=el("span");w.append(el("b",null,a.service||"—"));
+        w.append(el("span","w",(staffById(a.staffId)?staffById(a.staffId).name:a.staffName||"")+(a.note?" · "+a.note:"")));
+        r.append(d,w);box.append(r);
+      });
+    }catch(e){box.textContent="";box.append(el("div","none","Историята не се зареди. Проверете интернета."))}
+  }
+
+  /* ---------- формуляр: услуги ---------- */
+  function chosenNames(){return $("fSvc").value.split("+").map(s=>s.trim().toLowerCase()).filter(Boolean)}
+  function renderSvcChips(){
+    const box=$("svcChips");box.textContent="";
+    const chosen=chosenNames();
+    services.forEach(s=>{
+      const b=el("button");b.type="button";
+      b.append(document.createTextNode(s.name),el("small",null,durLabel(s.minutes)));
+      b.setAttribute("aria-pressed",String(chosen.indexOf(s.name.toLowerCase())>=0));
+      b.onclick=()=>toggleSvc(s);
+      box.append(b);
+    });
+  }
+  function toggleSvc(s){
+    const parts=$("fSvc").value.split("+").map(x=>x.trim()).filter(Boolean);
+    const i=parts.findIndex(p=>p.toLowerCase()===s.name.toLowerCase());
+    if(i>=0)parts.splice(i,1);else parts.push(s.name);
+    $("fSvc").value=parts.join(" + ");
+    // продължителност = сбор от избраните услуги
+    let total=0;parts.forEach(p=>{const sv=services.find(x=>x.name.toLowerCase()===p.toLowerCase());if(sv)total+=sv.minutes});
+    if(total){durOptions($("fDur"),total)}
+    renderSvcChips();checkOverlap();
+  }
+  $("fSvc").addEventListener("input",renderSvcChips);
+
+  /* ---------- формуляр: клиенти, подсказки, история ---------- */
+  function findClient(){
+    const ph=normPhone($("fPhone").value),nm=$("fClient").value.trim().toLowerCase();
+    if(ph.length>=6){const c=clients.find(c=>normPhone(c.phone)===ph);if(c)return c}
+    if(nm&&!ph)return clients.find(c=>c.name.trim().toLowerCase()===nm)||null;
+    return null;
+  }
+  function showSugg(fromField){
+    const box=$("sugg");box.textContent="";
+    const q=(fromField==="phone"?$("fPhone").value:$("fClient").value).trim();
+    const qd=normPhone(q),ql=q.toLowerCase();
+    if(q.length<2||!clients.length){box.hidden=true;return}
+    const hits=clients.filter(c=>{
+      if(fromField==="phone")return qd.length>=2&&normPhone(c.phone).indexOf(qd)>=0;
+      const n=c.name.toLowerCase();return n.indexOf(ql)===0||n.indexOf(" "+ql)>=0;
+    }).slice(0,6);
+    if(!hits.length||(hits.length===1&&hits[0].name===$("fClient").value.trim()&&normPhone(hits[0].phone)===normPhone($("fPhone").value))){box.hidden=true;return}
+    hits.forEach(c=>{
+      const b=el("button");b.type="button";
+      b.append(el("b",null,c.name),el("span",null,(c.phone||"без телефон")+" · последно "+shortDate(c.last)+" · "+c.count+(c.count===1?" посещение":" посещения")));
+      b.onmousedown=e=>e.preventDefault();
+      b.onclick=()=>{$("fClient").value=c.name;$("fPhone").value=c.phone||"";box.hidden=true;renderClientTools()};
+      box.append(b);
+    });
+    // показва подсказките под полето, в което се пише
+    (fromField==="phone"?$("fPhone"):$("fClient")).parentNode.after(box);
+    box.hidden=false;
+  }
+  $("fClient").addEventListener("input",()=>{showSugg("name");renderClientTools()});
+  $("fPhone").addEventListener("input",()=>{showSugg("phone");renderClientTools()});
+  $("fClient").addEventListener("blur",()=>setTimeout(()=>{$("sugg").hidden=true},150));
+  $("fPhone").addEventListener("blur",()=>setTimeout(()=>{$("sugg").hidden=true},150));
+
+  function renderClientTools(){
+    const box=$("clientTools");box.textContent="";$("histBox").hidden=true;
+    const p=$("fPhone").value.trim(),c=findClient();
+    if(p&&editing){
+      const a=el("a",null,"Обади се");a.href="tel:"+p.replace(/[^\d+]/g,"");
+      const cp=el("button","mini","Копирай номера");cp.type="button";
+      cp.onclick=async()=>{try{await navigator.clipboard.writeText(p);toast("Копирано")}catch(e){$("fPhone").select()}};
+      box.append(a,cp);
+    }
+    if(c){
+      const h=el("button","mini strong","История · "+c.count+(c.count===1?" посещение":" посещения"));h.type="button";
+      h.onclick=()=>toggleHistory(c);
+      box.append(h);
+    }
+    box.hidden=!box.children.length;
+  }
+  async function toggleHistory(c){
+    const box=$("histBox");
+    if(!box.hidden){box.hidden=true;return}
+    box.textContent="";box.append(el("div","none","Зареждане…"));box.hidden=false;
+    try{
+      const list=await api("getHistory",c.phone||"",c.phone?"":c.name);
+      box.textContent="";
+      if(!list.length){box.append(el("div","none","Няма предишни посещения."));return}
+      list.forEach(a=>{
+        const r=el("div","h");
+        const d=el("span","d",shortDate(a.date));d.append(el("span","w",a.start));
+        const w=el("span");w.append(el("b",null,a.service||"—"));
+        w.append(el("span","w",(staffById(a.staffId)?staffById(a.staffId).name:a.staffName||"")+(a.note?" · "+a.note:"")));
+        r.append(d,w);box.append(r);
+      });
+    }catch(e){box.textContent="";box.append(el("div","none","Историята не се зареди. Проверете интернета."))}
+  }
+
+  /* ---------- формуляр: застъпване (разрешено, само за информация) ---------- */
+  function currentBody(){
+    const start=$("fStart").value,dur=+$("fDur").value||60;
+    return {id:editing?editing.id:"",staffId:$("fStaff").value,date:$("fDate").value,start:start,end:start?fromMin(toMin(start)+dur):"",
+      service:$("fSvc").value.trim(),client:$("fClient").value.trim(),phone:$("fPhone").value.trim(),note:$("fNote").value.trim()};
+  }
+  function checkOverlap(){
+    const b=currentBody(),box=$("overlapInfo");
+    if(!b.start){box.hidden=true;return}
+    const list=appts.filter(a=>overlaps(a,b));
+    if(!list.length){box.hidden=true;return}
+    const nm=(staffById(b.staffId)||{}).name||"";
+    box.textContent=nm+" вече има по това време: "+list.map(a=>a.start+"–"+a.end+" "+(a.client||"")+(a.service?" ("+a.service+")":"")).join("; ")+". Часът ще се запише паралелно.";
+    box.hidden=false;
+  }
+  ["fStaff","fDate","fStart","fDur"].forEach(id=>$(id).addEventListener("change",checkOverlap));
+
+  function tintSheet(){const s=staffById($("fStaff").value);$("sheet").style.setProperty("--sc",s?colorOf(s):"var(--accent)")}
+  function suggestStart(sid,d){const l=appts.filter(a=>a.staffId===sid&&a.date===d).sort((x,y)=>x.end.localeCompare(y.end));return l.length?l[l.length-1].end:"09:00"}
+  function openSheet(a,staffId,date,start,prefill){
+    editing=a||null;delArmed=false;$("delBtn").textContent="Изтрий";
+    $("formMsg").textContent="";$("sugg").hidden=true;
+    const sel=$("fStaff");sel.textContent="";
+    staff.forEach(s=>{const o=el("option",null,s.name);o.value=s.id;sel.append(o)});
+    if(a){
+      $("sheetTitle").textContent="Записан час";
+      sel.value=a.staffId;$("fDate").value=a.date;$("fStart").value=a.start;
+      durOptions($("fDur"),toMin(a.end)-toMin(a.start));
+      $("fSvc").value=a.service||"";$("fClient").value=a.client||"";$("fPhone").value=a.phone||"";$("fNote").value=a.note||"";
+      $("delBtn").hidden=false;$("saveBtn").textContent="Запази промените";
+    }else{
+      const p=prefill||{};
+      $("sheetTitle").textContent=p.client?"Още процедура за "+p.client:"Нов час";
+      sel.value=staffId||(filter!=="all"?filter:(staff[0]&&staff[0].id))||"";
+      const dd=date||day;
+      $("fDate").value=dd;$("fStart").value=start||suggestStart(sel.value,dd);durOptions($("fDur"),60);
+      $("fSvc").value="";$("fClient").value=p.client||"";$("fPhone").value=p.phone||"";$("fNote").value="";
+      $("delBtn").hidden=true;$("saveBtn").textContent="Запиши";
+    }
+    tintSheet();renderSvcChips();renderClientTools();checkOverlap();
+    $("sheet").hidden=false;$("sheetBg").hidden=false;$("sheet").scrollTop=0;
+  }
+  function closeSheet(){$("sheet").hidden=true;$("sheetBg").hidden=true;editing=null}
+  $("cancelBtn").onclick=closeSheet;$("sheetBg").onclick=closeSheet;
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("sheet").hidden)closeSheet()});
+  $("fStaff").addEventListener("change",tintSheet);
+
+  $("form").addEventListener("submit",e=>{e.preventDefault();save(false)});
+  $("saveMoreBtn").onclick=()=>save(true);
+  async function save(more){
+    const body=currentBody();
+    if(!body.staffId||!body.date||!body.start){$("formMsg").textContent="Изберете служител, ден и час.";return}
+    if(!body.service||!body.client){$("formMsg").textContent="Попълнете клиент и услуга.";return}
+    $("saveBtn").disabled=true;$("saveMoreBtn").disabled=true;$("formMsg").textContent="";
+    const wasEdit=!!editing;
+    try{
+      const newId=await api("saveAppt",body);
+      const saved=Object.assign({},body,{id:newId||body.id});
+      appts=appts.filter(a=>a.id!==saved.id).concat([saved]);   // веднага в списъка, без да чакаме опресняване
+      const ws=mondayOf(parse(body.date));
+      if(iso(ws)!==iso(weekStart)){weekStart=ws;appts=[saved]}
+      if(view==="day")day=body.date;
+      closeSheet();renderAll();
+      if(more){
+        const other=staff.find(s=>s.id!==body.staffId);
+        openSheet(null,other?other.id:body.staffId,body.date,body.end,{client:body.client,phone:body.phone});
+        toast("Записано. Изберете следващата процедура.");
+      }else toast(wasEdit?"Промените са запазени":"Часът е записан");
+      load(true);loadClients();
+    }catch(err){$("formMsg").textContent=isPinErr(err)?"Кодът за вход е сменен. Презаредете страницата.":"Не се записа. Проверете интернета и опитайте пак."}
+    finally{$("saveBtn").disabled=false;$("saveMoreBtn").disabled=false}
+  }
+  $("delBtn").onclick=async()=>{
+    if(!editing)return;
+    if(!delArmed){delArmed=true;$("delBtn").textContent="Натисни пак за изтриване";return}
+    try{await api("deleteAppt",editing.id);const id=editing.id;closeSheet();appts=appts.filter(a=>a.id!==id);renderAll();toast("Часът е изтрит");load(true);loadClients()}
+    catch(e){$("formMsg").textContent="Не се изтри. Опитайте пак."}
+  };
+
+  /* ---------- навигация и служители ---------- */
+  function setWeek(d){weekStart=d;const k=iso(new Date());day=(k>=iso(d)&&k<=iso(addDays(d,6)))?k:iso(d);renderAll();load()}
+  $("prev").onclick=()=>setWeek(addDays(weekStart,-7));
+  $("next").onclick=()=>setWeek(addDays(weekStart,7));
+  $("todayBtn").onclick=()=>setWeek(mondayOf(new Date()));
+  $("fab").onclick=()=>openSheet(null);
+  $("setupMore").onclick=addSetupField;
+  $("setupSave").onclick=async()=>{
+    const names=[...$("setupFields").querySelectorAll("input")].map(i=>i.value.trim()).filter(Boolean);
+    if(!names.length){$("setupMsg").textContent="Въведете поне едно име.";return}
+    $("setupSave").disabled=true;
+    try{staff=await api("addStaff",names);renderAll();toast("Служителите са добавени")}
+    catch(e){$("setupMsg").textContent="Не се запази. Опитайте пак."}
+    finally{$("setupSave").disabled=false}
+  };
+  $("addStaffBtn").onclick=async()=>{
+    const v=$("newStaff").value.trim();if(!v)return;
+    try{staff=await api("addStaff",[v]);$("newStaff").value="";renderAll();toast("Добавен")}
+    catch(e){$("manageMsg").textContent="Не се добави. Опитайте пак."}
+  };
+
+  // опресняване на всеки 20 секунди, за да се виждат часовете, записани от колегите
+  setInterval(()=>{if(document.visibilityState==="visible"&&$("sheet").hidden&&!inSettings&&!inClients&&pin)load(true)},20000);
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&pin&&!inSettings&&!inClients)load(true)});
+
+  if(API_URL.indexOf("/exec")<0){$("status").textContent="Липсва линкът към Apps Script. Попълнете API_URL в началото на index.html.";return}
+  load();
+})();
+</script>
+</body>
+</html>
